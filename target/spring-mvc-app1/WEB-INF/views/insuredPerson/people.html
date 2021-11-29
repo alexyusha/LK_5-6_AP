@@ -1,0 +1,37 @@
+<!doctype html>
+<html xmlns:th = "http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+<p>List insured people</p>
+<table border="3px"  cellpadding="4">
+    <tr>
+        <td>Number contract</td>
+        <td>First name</td>
+        <td>Last name</td>
+        <td>Middle name</td>
+        <td>INN</td>
+        <td>Price</td>
+        <td>Operations</td>
+    </tr>
+    <div th:each = "pers : ${people}">
+        <tr>
+            <td th:text = "${pers.getNumberContract()}"></td>
+            <td th:text = "${pers.getFirstName()}"></td>
+            <td th:text = "${pers.getLastName()}"></td>
+            <td th:text = "${pers.getMiddleName()}"></td>
+            <td th:text = "${pers.getINN()}"></td>
+            <td th:text = "${pers.getPrice()}"></td>
+            <td>
+                <a th:href="@{/insuredPerson/{INN}/edit(INN=${pers.getINN()})}" >edit</a>
+            </td>
+        </tr>
+    </div>
+</table>
+</body>
+</html>

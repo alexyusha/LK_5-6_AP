@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en" xmlns:th = "http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+<table border="3px"  cellpadding="4">
+    <tr>
+        <td>Number contract</td>
+        <td>First name</td>
+        <td>Last name</td>
+        <td>Middle name</td>
+        <td>INN</td>
+        <td>Price</td>
+    </tr>
+    <tr>
+            <td th:text = "${person.getNumberContract()}"></td>
+            <td th:text = "${person.getFirstName()}"></td>
+            <td th:text = "${person.getLastName()}"></td>
+            <td th:text = "${person.getMiddleName()}"></td>
+            <td th:text = "${person.getINN()}"></td>
+            <td th:text = "${person.getPrice()}"></td>
+    </tr>
+    </div>
+</table>
+</body>
+</html>

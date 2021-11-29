@@ -1,0 +1,31 @@
+<!doctype html>
+<html xmlns:th = "http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Contracts</title>
+</head>
+<body>
+<p>List contract</p>
+<table border="3px" cellpadding="4">
+<tr>
+    <td>Number</td>
+    <td>Insured person</td>
+</tr>
+<div th:each = "contract : ${contracts}">
+        <tr>
+            <td th:text = "${contract.getNumber()}"></td>
+            <td>
+                <div th:each = "ins : ${insuredPeople}">
+                     <p th:text = "${ins.getINN()}"
+                        th:if = "${ins.getNumberContract()==contract.getNumber()}" ></p>
+                </div>
+                <a th:href="@{/contract/{number}(number=${contract.getNumber()})}">List insured people</a>
+            </td>
+        </tr>
+</div>
+</table>
+</body>
+</html>

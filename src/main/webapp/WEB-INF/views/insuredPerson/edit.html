@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th = "http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<form th:method="PATCH" th:action="@{/insuredPerson/{INN}(INN=${person.getINN()})}" th:object="${person}">
+
+  <label for="num">Number Contract</label>
+  <input type="text" th:field="*{numberContract}" id="num"/>
+  <br>
+  <label for="firstName">First name</label>
+  <input type="text" th:field="*{firstName}" id="firstName"/>
+  <br>
+  <label for="lastName">Last name</label>
+  <input type="text" th:field="*{lastName}" id="lastName"/>
+  <br>
+  <label for="middleName">Middle name</label>
+  <input type="text" th:field="*{middleName}" id="middleName"/>
+  <br>
+  <label for="INN">INN</label>
+  <input type="text" th:field="*{INN}" id="INN"/>
+  <br>
+  <label for="price">Price</label>
+  <input type="text" th:field="*{price}" id="price"/>
+  <br>
+  <input type="submit" value="Update!"/>
+</form>
+
+<form th:method="DELETE" th:action="@{/insuredPerson/{INN}(INN=${person.getINN()})}">
+  <input type="submit" value="Delete">
+</form>
+
+</body>
+</html>
