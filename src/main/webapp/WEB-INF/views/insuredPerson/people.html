@@ -25,10 +25,11 @@
             <td th:text = "${pers.getFirstName()}"></td>
             <td th:text = "${pers.getLastName()}"></td>
             <td th:text = "${pers.getMiddleName()}"></td>
-            <td th:text = "${pers.getINN()}"></td>
+            <td th:text = "${pers.getInn()}"></td>
             <td th:text = "${pers.getPrice()}"></td>
             <td>
-                <a th:href="@{/insuredPerson/{INN}/edit(INN=${pers.getINN()})}" >edit</a>
+                <a th:href="@{/insuredPerson/{inn}/edit(inn=${pers.getInn()})}" >edit</a>
+                <a th:href="@{/contract/{number}(number=${pers.getNumberContract()})}" >contract</a>
             </td>
         </tr>
     </div>

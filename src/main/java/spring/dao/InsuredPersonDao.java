@@ -1,56 +1,179 @@
 package spring.dao;
 
+import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
+import spring.model.Contract;
 import spring.model.InsuredPerson;
+import spring.service.ConnectionDB;
 
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-@Component
-public class InsuredPersonDao {
-    private List<InsuredPerson> insuredPeopleList;
+@Repository
+public class InsuredPersonDao extends CRUD<InsuredPerson> {
+    private static final String CREATE = "INSERT INTO insured_people(first_name, last_name, middle_name, INN, price, number_contract) VALUES(?, ? ,?, ?, ?, ?)";
+    private static final String READ = "SELECT first_name, last_name, middle_name, INN, price, number_contract FROM insured_people WHERE INN = ?";
+    private static final String UPDATE = "UPDATE insured_people SET first_name = ?, last_name = ?, middle_name = ?, INN = ?, price = ?, number_contract = ? WHERE INN = ?";
+    private static final String DELETE = "DELETE FROM insured_people WHERE INN = ?";
+    private static final String SELECT_CHECK = "SELECT id, INN FROM insured_people WHERE INN = ?";
+    private static final String ALL_PEOPLE = "SELECT first_name, last_name, middle_name, INN, price, number_contract FROM insured_people";
 
-   {
-        insuredPeopleList = new ArrayList<>();
-        insuredPeopleList.add(new InsuredPerson(1,"alex", "gnilitsky",null,"1",100.0));
-        insuredPeopleList.add(new InsuredPerson(2,"alex", "gnilitsky",null,"2",100.0));
+
+    public long create(InsuredPerson person) {
+        long id = 0;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet set = null;
+
+        try {
+            connection = ConnectionDB.getConnection();
+            preparedStatement = connection.prepareStatement(CREATE, Statement.RETURN_GENERATED_KEYS);
+            if (checkINN(person.getInn()) != null) {
+                setValue(preparedStatement, person);
+                preparedStatement.executeUpdate();
+                set = preparedStatement.getGeneratedKeys();
+                set.next();
+                id = set.getInt(1);
+            } else {
+                id = getId(person.getInn(), SELECT_CHECK, "inn");
+            }
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            ConnectionDB.closeConnection(preparedStatement, connection, set);
+        }
+        return id;
     }
 
-    public List<InsuredPerson> getInsuredPerson(){
-        return insuredPeopleList;
+    public InsuredPerson read(String INN) {
+        InsuredPerson person = null;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet set = null;
+        try {
+            connection = ConnectionDB.getConnection();
+            preparedStatement = connection.prepareStatement(READ);
+            preparedStatement.setString(1, INN);
+            set = preparedStatement.executeQuery();
+            while (set.next()) {
+                person = new InsuredPerson(set.getString("first_name")
+                        ,set.getString("last_name")
+                        , set.getString("middle_name")
+                        , set.getString("inn")
+                        , set.getDouble("price")
+                        , set.getString("number_contract"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            ConnectionDB.closeConnection(preparedStatement, connection, set);
+        }
+        return person;
     }
 
-    public List<InsuredPerson> getInsuredPersonList(int numberContract){
-        List<InsuredPerson> insuredPersonList = new ArrayList<>();
+    public void update(InsuredPerson person) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            if (checkINN(person.getInn()) == null){
+                connection = ConnectionDB.getConnection();
+                preparedStatement = connection.prepareStatement(UPDATE);
+                setValue(preparedStatement, person);
+                preparedStatement.setString(7, person.getInn());
+                preparedStatement.executeUpdate();
+            }
+            else{
+                create(person);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            ConnectionDB.closeConnection(preparedStatement, connection, null);
+        }
+    }
 
-        for (InsuredPerson insuredPerson : insuredPeopleList){
-            if (insuredPerson.getNumberContract() == numberContract){
-                insuredPersonList.add(insuredPerson);
+    public void delete(String INN) {
+        delete(INN, DELETE);
+    }
+
+    public void createAll(Contract contract) {
+        for (InsuredPerson person : contract.getInsuredPersons()) {
+            create(person);
+        }
+    }
+
+    public List<InsuredPerson> readAll(Contract contract) {
+        String number = contract.getNumber();
+        List<InsuredPerson> contractPeople = new ArrayList<>();
+        List<InsuredPerson> list = getInsuredPerson();
+        for (InsuredPerson person : list){
+            if (person.getNumberContract().equals(number)){
+                contractPeople.add(person);
             }
         }
-
-        return insuredPersonList;
+        return contractPeople;
     }
 
-    public void save(InsuredPerson insuredPerson){
-        insuredPeopleList.add(insuredPerson);
+    public void updateAll(Contract contract) {
+        for (InsuredPerson person : contract.getInsuredPersons()) {
+            update(person);
+        }
     }
 
-    public InsuredPerson show(String INN){
-        return insuredPeopleList.stream().filter(person -> person.getINN().equals(INN)).findAny().orElse(null);
+    public void deleteAll(Contract contract) {
+        for (InsuredPerson person : contract.getInsuredPersons()) {
+            delete(person.getInn());
+        }
     }
 
-    public void update(String INN, InsuredPerson updatedInsuredPerson){
-        InsuredPerson insuredPerson = show(INN);
-
-        insuredPerson.setFirstName(updatedInsuredPerson.getFirstName());
-        insuredPerson.setLastName(updatedInsuredPerson.getLastName());
-        insuredPerson.setMiddleName(updatedInsuredPerson.getMiddleName());
-        insuredPerson.setINN(updatedInsuredPerson.getINN());
-        insuredPerson.setPrice(updatedInsuredPerson.getPrice());
+    String checkINN(String INN) {
+        return checkUniqueness(INN, SELECT_CHECK, "inn");
     }
 
-    public void delete(String INN){
-        insuredPeopleList.removeIf(person -> person.getINN().equals(INN));
+    @SneakyThrows
+    protected void setValue(PreparedStatement preparedStatement, InsuredPerson person) {
+        preparedStatement.setString(1, person.getFirstName());
+        preparedStatement.setString(2, person.getLastName());
+        preparedStatement.setString(3, person.getMiddleName());
+        preparedStatement.setString(4, person.getInn());
+        preparedStatement.setDouble(5, person.getPrice());
+        preparedStatement.setString(6, person.getNumberContract());
+    }
+
+    @SneakyThrows
+    public List<InsuredPerson> getInsuredPerson(){
+        List<InsuredPerson> list = new ArrayList<>();
+        InsuredPerson person;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet set = null;
+        try{
+            connection = ConnectionDB.getConnection();
+            preparedStatement = connection.prepareStatement(ALL_PEOPLE);
+            set = preparedStatement.executeQuery();
+
+            while (set.next()) {
+                person = new InsuredPerson(set.getString("first_name")
+                        ,set.getString("last_name")
+                        , set.getString("middle_name")
+                        , set.getString("inn")
+                        , set.getDouble("price")
+                        , set.getString("number_contract"));
+                list.add(person);
+            }
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+        }
+        finally {
+            ConnectionDB.closeConnection(preparedStatement, connection, set);
+        }
+
+        return list;
     }
 }

@@ -2,7 +2,11 @@ package spring.model;
 
 import lombok.*;
 
-import java.util.Calendar;
+
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 @Getter
@@ -11,9 +15,10 @@ import java.util.List;
 @AllArgsConstructor
 public class Contract {
 
-    private int number;
-    //private Calendar dateConclusion;
-    //private Calendar startContract;
-    //private Calendar finishContract;
-    private List<InsuredPerson> insuredPeoples;
+    private long id;
+    @NotEmpty(message = "Number should not be empty")
+    @Size(min = 1, max = 10, message = "1 between 10")
+    @Positive
+    private String number;
+    private List<InsuredPerson> insuredPersons;
 }

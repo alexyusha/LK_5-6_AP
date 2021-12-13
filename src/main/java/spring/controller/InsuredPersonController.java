@@ -4,62 +4,67 @@ package spring.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import spring.dao.InsuredPersonDao;
 import spring.model.InsuredPerson;
+import spring.service.InsuredPersonDBService;
 
+import javax.validation.Valid;
 import java.io.StringReader;
 
 @Controller
 @RequestMapping("/insuredPerson")
 public class InsuredPersonController {
 
-    private final InsuredPersonDao insuredPersonDao;
-
     @Autowired
-    public InsuredPersonController(InsuredPersonDao insuredPersonDao){
-        this.insuredPersonDao = insuredPersonDao;
-    }
+    private InsuredPersonDBService insuredPersonDBService;
 
     @GetMapping()
-    public String index(Model model){
-        model.addAttribute("people", insuredPersonDao.getInsuredPerson());
+    public String index(Model model) {
+        model.addAttribute("people", insuredPersonDBService.getPeople());
         return "insuredPerson/people";
     }
 
-    @GetMapping("/{INN}")
-    public String show(@PathVariable("INN") String INN, Model model){
-        model.addAttribute("person", insuredPersonDao.show(INN));
+    @GetMapping("/{inn}")
+    public String show(@PathVariable("inn") String INN, Model model) {
+        model.addAttribute("person", insuredPersonDBService.getPerson(INN));
         return "insuredPerson/show";
     }
 
     @GetMapping("/new")
-    public String newPerson(@ModelAttribute("person") InsuredPerson insuredPerson){
+    public String newPerson(@ModelAttribute("person") InsuredPerson insuredPerson) {
         return "insuredPerson/new";
     }
 
     @PostMapping()
-    public String create(@ModelAttribute("person") InsuredPerson insuredPerson){
-        insuredPersonDao.save(insuredPerson);
+    public String create(@ModelAttribute("person") @Valid InsuredPerson insuredPerson, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()){
+            return "insuredPerson/new";
+        }
+        insuredPersonDBService.add(insuredPerson);
         return "redirect:/insuredPerson";
     }
 
-    @GetMapping("/{INN}/edit")
-    public String edit(Model model, @PathVariable("INN") String INN){
-        model.addAttribute("person", insuredPersonDao.show(INN));
+    @GetMapping("/{inn}/edit")
+    public String edit(@PathVariable("inn") String INN, Model model) {
+        model.addAttribute("person", insuredPersonDBService.getPerson(INN));
         return "insuredPerson/edit";
     }
 
-    @PatchMapping("/{INN}")
-    public String update(@ModelAttribute("person") InsuredPerson person, @PathVariable("INN") String INN){
-        insuredPersonDao.update(INN, person);
+    @PatchMapping("/{inn}")
+    public String update(@ModelAttribute("person") @Valid InsuredPerson person,BindingResult result, @PathVariable("inn") String INN) {
+        if (result.hasErrors()){
+            return "insuredPerson/edit";
+        }
+        insuredPersonDBService.save(person);
         return "redirect:/insuredPerson";
     }
 
-    @DeleteMapping("/{INN}")
-    public String delete(@PathVariable("INN") String INN){
-        insuredPersonDao.delete(INN);
+    @DeleteMapping("/{inn}")
+    public String delete(@PathVariable("inn") String INN) {
+        insuredPersonDBService.remove(INN);
         return "redirect:/insuredPerson";
     }
 }

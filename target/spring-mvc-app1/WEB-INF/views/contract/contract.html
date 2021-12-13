@@ -17,6 +17,7 @@
         <td>Middle name</td>
         <td>INN</td>
         <td>Price</td>
+        <td>Operations</td>
     </tr>
     <div th:each = "pers : ${list}">
         <tr>
@@ -24,8 +25,11 @@
             <td th:text = "${pers.getFirstName()}"></td>
             <td th:text = "${pers.getLastName()}"></td>
             <td th:text = "${pers.getMiddleName()}"></td>
-            <td th:text = "${pers.getINN()}"></td>
+            <td th:text = "${pers.getInn()}"></td>
             <td th:text = "${pers.getPrice()}"></td>
+            <td>
+                <a th:href="@{/insuredPerson/{inn}/edit(inn=${pers.getInn()})}" >edit</a>
+            </td>
         </tr>
     </div>
 </table>

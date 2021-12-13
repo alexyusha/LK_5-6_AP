@@ -8,32 +8,31 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import spring.dao.ContractDao;
 import spring.dao.InsuredPersonDao;
+import spring.model.Contract;
+import spring.service.ContractDBService;
+import spring.service.InsuredPersonDBService;
 
 @Controller
 @RequestMapping("/contract")
 public class ContractController {
 
-
-    private final ContractDao contractDao;
-    private final InsuredPersonDao insuredPersonDao;
-
     @Autowired
-    public  ContractController(ContractDao contractDao, InsuredPersonDao insuredPersonDao){
-        this.contractDao = contractDao;
-        this.insuredPersonDao = insuredPersonDao;
-    }
+    private ContractDBService contractDBService;
+    @Autowired
+    private InsuredPersonDBService insuredPersonDBService;
 
     @GetMapping()
     public String index(Model model){
-        model.addAttribute("contracts", contractDao.getContracts());
-        model.addAttribute("insuredPeople", insuredPersonDao.getInsuredPerson());
+        model.addAttribute("contracts", contractDBService.getContracts());
+        model.addAttribute("insuredPeople", insuredPersonDBService.getPeople());
         return "contract/contracts";
     }
 
     @GetMapping("/{number}")
-    public String show(@PathVariable("number") int number, Model model){
-        model.addAttribute("contract", contractDao.show(number));
-        model.addAttribute("list", insuredPersonDao.getInsuredPersonList(number));
+    public String show(@PathVariable("number") String number, Model model){
+        Contract contract = contractDBService.getContract(number);
+        model.addAttribute("contract", contract);
+        model.addAttribute("list", insuredPersonDBService.getPeopleContract(contract));
         return "contract/contract";
     }
 }

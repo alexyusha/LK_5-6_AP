@@ -12,6 +12,7 @@
 <table border="3px" cellpadding="4">
 <tr>
     <td>Number</td>
+
     <td>Insured person</td>
 </tr>
 <div th:each = "contract : ${contracts}">
@@ -19,7 +20,7 @@
             <td th:text = "${contract.getNumber()}"></td>
             <td>
                 <div th:each = "ins : ${insuredPeople}">
-                     <p th:text = "${ins.getINN()}"
+                     <p th:text = "${ins.getInn()}"
                         th:if = "${ins.getNumberContract()==contract.getNumber()}" ></p>
                 </div>
                 <a th:href="@{/contract/{number}(number=${contract.getNumber()})}">List insured people</a>
